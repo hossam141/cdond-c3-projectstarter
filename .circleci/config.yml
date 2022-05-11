@@ -122,15 +122,15 @@ jobs:
               --output text)
             echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
 
-        - run: yum -y install tar gzip
+      - run: yum -y install tar gzip
 
-        - persist_to_workspace:
-            root: ~/
-            paths:
+      - persist_to_workspace:
+          root: ~/
+          paths:
               - project/.circleci/ansible/inventory.txt
 
-        - destroy_environment:
-            workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"        
+      - destroy_environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"        
 
 workflows:
   default:
