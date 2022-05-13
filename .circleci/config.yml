@@ -1,6 +1,16 @@
 version: 2.1
 
 commands:
+  install_awscli:
+    description: Insatll AWS CLI v2
+    steps:
+      - run:
+          name: Install AWS CLI v2
+          coomand: |
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+  
   destroy_environment:
     description: Destroy backend and frontend cloudformation stacks given a workflow ID.
     parameters:
@@ -15,7 +25,27 @@ commands:
             echo "Destroying environment: <<parameters.workflow_id>> "
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow_id >>
             aws s3 rm s3://udapeople-<<parameters.workflow_id>> --recursive
-            aws cloudformation delete-stack --stack-name udapeople-frontend-< <parameters.workflow_id >>       
+            aws cloudformation delete-stack --stack-name udapeople-frontend-<<parameters.workflow_id >>
+
+
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      workflow_id:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:7}
+    steps:
+      - run:
+          name: Revert migrations
+          when: on_fail
+          command: |
+            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
+            SUCCESS=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/migration_<<parameters.workflow_id >>)
+            if(( $SUCCESS==1 )); 
+            then
+            cd ~/project/backend
+            npm run migrations:revert
+            fi
 
 jobs:
   build-frontend:
@@ -159,6 +189,7 @@ jobs:
       - image: python:3.7-alpine3.11
     steps:
       - checkout
+      - install_awscli
       - add_ssh_keys:
           fingerprints: [ "4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b" ]
       - attach_workspace:
@@ -177,8 +208,29 @@ jobs:
             ansible-playbook -i inventory.txt configure-server.yml
 
       - destroy_environment
-      
 
+  run-migrations:
+      docker:
+        - image: cimg/ndoe:13.8.0
+      steps:
+        - checkout
+        - install_awscli
+        - run:
+            name: Run migrations
+            command: |
+              cd backend 
+              npm install
+              npm run migrations > migrations_dump.txt 
+        - run:
+            name: Send migration status to kvdb.io
+            command: |
+              if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt 
+              then 
+                curl https://kvdb.io/${KVDB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+              fi
+        - destroy_environment
+        - revert-migrations
+        
 workflows:
   default:
     jobs:
@@ -199,3 +251,5 @@ workflows:
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
