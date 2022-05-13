@@ -285,6 +285,7 @@ jobs:
             cd backend
             npm install
             npm run build
+            cd ..
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt 
