@@ -1,0 +1,29 @@
+---
+  - name: install rsync on the ansible controller
+    become: yes
+    connection: local
+    package:
+      name: 
+        - openssh
+        - rsync
+      state: present
+      
+  - name: "move files to server"
+    become: yes
+    synchronize:
+      src: /root/project/backend/dist
+      dest: ./udapeople
+      recursive: true
+
+  - name: "move node modules"
+    become: yes
+    synchronize:
+      src: /root/project/backend/node_modules
+      dest: ./udapeople
+      recursive: true
+
+  - name: "run server"
+    become: true
+    command: pm2 start -f ./main.js
+    args:
+      chdir: ./udapeople/dist
