@@ -210,7 +210,7 @@ jobs:
 
   run-migrations:
       docker:
-        - image: circleci/node:13.8.0
+        - image: circleci/ndoe:13.8.0
       steps:
         - checkout
         - install_awscli
@@ -219,6 +219,8 @@ jobs:
             command: |
               cd backend 
               npm install
+              npm audit fix --audit-level=critical --force
+              npm audit --audit-level=critical
               npm run migrations > migrations_dump.txt 
         - run:
             name: Send migration status to kvdb.io
