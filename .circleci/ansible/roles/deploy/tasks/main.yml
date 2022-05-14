@@ -12,7 +12,13 @@
   - name: "Installing Node"
     shell: |
       cd /home/ubuntu/backend
-      npm i
+      curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+      sudo apt install -y nodejs
+      sudo npm install -g npm@latest
+      sudo npm install -g webpack-dev-server
+      sudo npm install
+      sudo npm run build
+      sudo pm2 start npm --name backend -- start
 
   - name: "Executing Node app with PM2"
     shell: |
