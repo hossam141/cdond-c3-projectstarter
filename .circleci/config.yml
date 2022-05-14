@@ -302,10 +302,15 @@ jobs:
       - restore_cache:
           keys: [backend-deps]
       - run:
-          name: package backend
+          name: Install dependencies
           command: |
             cd backend
             npm install
+      - run:
+          name: package backend
+          command: |
+            cd backend
+            npm i
             npm run build
             cd ../
             tar -czf artifact.tar.gz backend
