@@ -1,7 +1,7 @@
 ---
   - name: "Copy Backend file"
     copy:
-      path: artifact.tar.gz
+      src: artifact.tar.gz
       dest: /home/ubuntu
       
   - name: "unarchive backend files"
