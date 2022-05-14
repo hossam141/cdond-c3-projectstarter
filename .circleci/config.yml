@@ -70,7 +70,7 @@ commands:
 jobs:
   build-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -87,7 +87,7 @@ jobs:
 
   build-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -104,7 +104,7 @@ jobs:
 
   test-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -118,11 +118,11 @@ jobs:
 
   test-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-test]
+          keys: [backend-build]
       - run:
           name: Back-end test
           command: |
@@ -132,7 +132,7 @@ jobs:
 
   scan-frontend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
@@ -147,11 +147,11 @@ jobs:
 
   scan-backend:
     docker:
-      - image: circleci/node:13.8.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - restore_cache:
-          keys: [backend-analyze]
+          keys: [backend-build]
       - run:
           name: Back-end analyze
           command: |
@@ -230,10 +230,12 @@ jobs:
 
   run-migrations:
       docker:
-        - image: circleci/node:13.8.0
+        - image: cimg/node:13.8.0
       steps:
         - checkout
         - install_awscli
+        - restore_cache:
+          keys: [backend-build]
         - run:
             name: Run migrations
             command: |
@@ -242,7 +244,6 @@ jobs:
               npm build
               npm run migrations > migrations_dump.txt
               cat migrations_dump.txt 
-              cat migrations_dump.txt
         - run:
             name: Send migration status to kvdb.io
             command: |
@@ -255,19 +256,18 @@ jobs:
         
   deploy-frontend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:2022.04 
     steps:
       - checkout
+      - install_awscli
+      - install_nodejs
       - restore_cache:
-          keys: [frontend-deps]
-      - attach_workspace:
-          at: ~/
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
-            apk add --update curl nodejs npm tar
-            pip install awscli
-            
+            cd frontend
+            npm install   
       - run:
           name: Get backend url
           command: |
@@ -300,7 +300,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - restore_cache:
-          keys: [backend-deps]
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
