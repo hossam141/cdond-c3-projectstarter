@@ -1,29 +1,30 @@
 ---
-  - name: install rsync on the ansible controller
-    become: yes
-    connection: local
-    package:
-      name: 
-        - openssh
-        - rsync
-      state: present
+  - name: "Creates backend app dirtectory"
+    file:
+      path: ~/backend-app
+      state: directory
       
-  - name: "move files to server"
-    become: yes
-    synchronize:
-      src: /root/project/backend/dist
-      dest: ./udapeople
-      recursive: true
+  - name: "unarchrive backend files"
+    unarchrive:
+      src: artifact.tar.gz
+      dest: ./backend-app
 
-  - name: "move node modules"
-    become: yes
-    synchronize:
-      src: /root/project/backend/node_modules
-      dest: ./udapeople
-      recursive: true
+  - name: "Installing Node Dependencies"
+    shell:
+      cd ~/backend-app
+      npm i
 
-  - name: "run server"
-    become: true
-    command: pm2 start main.js
-    args:
-      chdir: ./udapeople/dist
+  - name: "Executing Node app with PM2"
+    shell:
+      cd ~/backend-app/dist
+      pm2 stop default
+      pm2 start main.js
+    register: execute_node
+  
+  - name: "print message"
+    debug:
+      msg: "{{ execute_node.stdout_lines }}"
+
+  - name: "Configure pm2 to start as service"
+    shell: |
+      env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp  /home/ubuntu
