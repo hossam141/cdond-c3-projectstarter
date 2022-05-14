@@ -293,10 +293,11 @@ jobs:
       - image: cimg/base:2022.04
     steps:
       - checkout
+      - install_awscli
       - install_ansible
       - install_nodejs
       - add_ssh_keys:
-          fingerprints: [ "4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b" ]
+          fingerprints: ["4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b"]
       - attach_workspace:
           at: ~/
       - restore_cache:
@@ -321,12 +322,9 @@ jobs:
             export TYPEORM_MIGRATIONS_DIR=.migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
-            
             cd .circleci/ansible
-            echo "Contents  of the inventory.txt file is -------"
-            cat inventory.txt 
             ansible-playbook -i inventory.txt deploy-backend.yml
-      - destroy_environment
+      - destroy-environment
       - revert-migrations
 
 workflows:
