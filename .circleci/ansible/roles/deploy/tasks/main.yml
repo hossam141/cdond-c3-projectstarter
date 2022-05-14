@@ -12,7 +12,7 @@
   - name: "Installing Node node"
     shell: |
       cd /home/ubuntu/backend
-      npm i
+      npm install
 
   - name: "Executing Node app with PM2"
     shell: |
