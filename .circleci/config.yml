@@ -303,7 +303,7 @@ jobs:
           keys: [backend-deps]
       - run:
           name: package backend
-            command: |
+          command: |
             cd backend
             npm install
             npm run build
