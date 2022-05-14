@@ -1,22 +1,22 @@
 ---
-  - name: "Creates backend app dirtectory"
-    file:
-      path: ~/backend-app
-      state: directory
+  - name: "Copy Backend file"
+    copy:
+      path: artifact.tar.gz
+      dest: /home/ubuntu
       
   - name: "unarchive backend files"
-    unarchive:
-      src: artifact.tar.gz
-      dest: ./backend-app
+    ansible.builtin.shell: tar -xzf artifact.tar.gz
+    args: 
+      chdir: /home/ubuntu
 
-  - name: "Installing Node Dependencies"
-    shell:
-      cd ~/backend-app
+  - name: "Installing Node node"
+    shell: |
+      cd /home/ubuntu/backend
       npm i
 
   - name: "Executing Node app with PM2"
-    shell:
-      cd ~/backend-app/dist
+    shell: |
+      cd /home/ubuntu/backend
       pm2 stop default
       pm2 start main.js
     register: execute_node
