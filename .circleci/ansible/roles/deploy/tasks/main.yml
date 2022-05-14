@@ -4,8 +4,8 @@
       path: ~/backend-app
       state: directory
       
-  - name: "unarchrive backend files"
-    unarchrive:
+  - name: "unarchive backend files"
+    unarchive:
       src: artifact.tar.gz
       dest: ./backend-app
 
