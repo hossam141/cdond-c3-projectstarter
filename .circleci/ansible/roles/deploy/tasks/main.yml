@@ -9,17 +9,16 @@
     args: 
       chdir: /home/ubuntu
 
-  - name: "Installing Node node"
+  - name: "Installing Node"
     shell: |
       cd /home/ubuntu/backend
-      npm install
+      npm i
 
   - name: "Executing Node app with PM2"
     shell: |
-      cd /home/ubuntu/backend/dist
+      cd /home/ubuntu/dist
       pm2 stop default
-      pm2 start main.js
-  
+      pm2 start main.js  
 
   - name: "Configure pm2 to start as service"
     become: true
