@@ -1,26 +1,24 @@
 ---
-  - name: "Creates backend app directory"
-    file:
-      path: ~/backend-app
-      state: directory
-      
-  - name: "Unarchive backend files"
-    unarchive:
-      src: artifact.tar.gz
-      dest: ~/backend-app
+- name: "Copy Backend file"
+  copy:
+    src: artifact.tar.gz
+    dest: /home/ubuntu
 
-  - name: "Installing dependencies"
-    shell: |
-      cd ~/backend-app
+- name: "Unarchive backend file"
+  ansible.builtin.shell: tar -xzf artifact.tar.gz
+  args:
+    chdir: /home/ubuntu
+
+- name: "installing node"
+  shell: |
+      cd /home/ubuntu/backend
       npm i
-
-  - name: "Executing Node app with PM2"
-    shell: |
-      cd cd ~/backend-app/dist
+- name: "excuting with pm"
+  shell: |
+      cd /home/ubuntu/backend/dist
       pm2 stop default
-      pm2 start main.js  
-
-  - name: "Configure pm2 to start as service"
-    become: true
-    shell: |
-      env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp  /home/ubuntu
+      pm2 start main.js
+- name: "pm2 server start"
+  become: true
+  shell: |
+    env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu

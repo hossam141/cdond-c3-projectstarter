@@ -191,10 +191,8 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
+            echo $BACKEND_AWS_PUBLIC_IP >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
-
-      - run: yum -y install tar gzip
 
       - persist_to_workspace:
           root: ~/
@@ -209,6 +207,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - checkout
+      - install_awscli
       - install_ansible
       - add_ssh_keys:
           fingerprints: [ "4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b" ]
@@ -251,7 +250,7 @@ jobs:
         
   deploy-frontend:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:2022.04 
     steps:
       - checkout
       - install_awscli
@@ -285,7 +284,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/base:stable
+      - image: cimg/base:2022.04
     steps:
       - checkout
       - install_awscli
@@ -306,10 +305,10 @@ jobs:
           name: Package backend
           command: |
             cd backend
+            npm i
             npm run build
-            tar -czf artifact.tar.gz dist/* package*
-
-            cd ..
+            cd ../
+            tar -czf artifact.tar.gz backend
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files 
 
       - run:
