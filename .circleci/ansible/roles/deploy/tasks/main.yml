@@ -1,5 +1,5 @@
 ---
-  - name: "Creates backend app directory"
+  - name: "Creates backend directory"
     file:
       path: ~/backend
       state: directory
@@ -23,5 +23,3 @@
       sudo npm install
       sudo npm run build
       sudo pm2 start npm --name backend -- start
-
- 
