@@ -191,8 +191,10 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            echo $BACKEND_AWS_PUBLIC_IP >> .circleci/ansible/inventory.txt
+            echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
+
+      - run: yum -y install tar gzip
 
       - persist_to_workspace:
           root: ~/
@@ -204,15 +206,19 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: cimg/base:stable
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
-      - install_awscli
-      - install_ansible
       - add_ssh_keys:
           fingerprints: [ "4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b" ]
       - attach_workspace:
-          at: ~/  
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl nodejs npm ansible zip
+            pip install awscli
+
       - run:
           name: Configure server
           command: |
@@ -256,7 +262,7 @@ jobs:
       - install_awscli
       - install_nodejs
       - restore_cache:
-          keys: [frontend-build]
+          keys: [backend-build]
       - run:
           name: Install dependencies
           command: |
@@ -269,8 +275,8 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            export API_URL="http://${BACKEND_PUPLIC_IP}:3030" >> frontend/.env
-            cat frontend/.env
+            export API_URL="http://${BACKEND_PUPLIC_IP}:3030"
+            echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
@@ -302,22 +308,20 @@ jobs:
             cd backend
             npm install
       - run:
-          name: Package backend
+          name: package backend
           command: |
             cd backend
             npm i
             npm run build
             cd ../
             tar -czf artifact.tar.gz backend
-            cp artifact.tar.gz .circleci/ansible/roles/deploy/files 
-
+            cp artifact.tar.gz .circleci/ansible/roles/deploy/tasks/files
       - run:
           name: Deploy backend
           command: |
             export TYPEORM_MIGRATIONS_DIR=.migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
-
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment

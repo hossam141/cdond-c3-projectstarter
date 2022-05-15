@@ -1,32 +1,25 @@
 ---
-- name: "Copy Backend file"
-  copy:
-    src: artifact.tar.gz
-    dest: /home/ubuntu
+  - name: "Creates backend app directory"
+    file:
+      path: ~/backend-app
+      state: directory
+      mode: 0755
+      
+  - name: "Unarchive backend files"
+    unarchive:
+      src: artifact.tar.gz
+      dest: ~/backend-app
+      mode: 0755
+      owner: ubuntu
+      group: ubuntu
 
-- name: "Unarchive backend file"
-  ansible.builtin.shell: tar -xzf artifact.tar.gz
-  args:
-    chdir: /home/ubuntu
-
-- name: "installing node"
-  shell: |
-      cd /home/ubuntu/backend
-      cd backend   
+  - name: "Installing dependencies"
+    shell: |
+      cd ~/backend-app
       curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
       sudo apt install -y nodejs
       sudo npm install -g npm@latest
       sudo npm install -g webpack-dev-server
       sudo npm install
       sudo npm run build
-      sudo pm2 start npm --name backend -- start      
-
-- name: "excuting with pm"
-  shell: |
-      cd /home/ubuntu/backend/dist
-      pm2 stop default
-      pm2 start main.js
-- name: "pm2 server start"
-  become: true
-  shell: |
-    env PATH=$PATH:/usr/local/bin pm2 startup systemd -u ubuntu --hp /home/ubuntu
+      sudo pm2 start npm --name backend -- start
