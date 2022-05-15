@@ -7,7 +7,7 @@
       
   - name: "Unarchive backend files"
     unarchive:
-      src: artifact.tar.gz
+      src: ~/project/artifact.tar.gz
       dest: ~/backend-app
       mode: 0755
       owner: ubuntu
@@ -15,7 +15,7 @@
 
   - name: "Installing dependencies"
     shell: |
-      cd ~/backend-app
+      cd backend-app
       curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
       sudo apt install -y nodejs
       sudo npm install -g npm@latest

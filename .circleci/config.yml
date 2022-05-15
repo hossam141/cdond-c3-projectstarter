@@ -306,9 +306,8 @@ jobs:
           name: package backend
           command: |
             cd backend
-            npm i
             npm run build
-            cd ../
+            cd ..
             tar -czf artifact.tar.gz backend
             cp artifact.tar.gz .circleci/ansible/roles/deploy/tasks/files
       - run:
