@@ -1,21 +1,21 @@
 ---
   - name: "Creates backend app directory"
     file:
-      path: ~/backend-app
+      path: ~/backend
       state: directory
       mode: 0755
       
   - name: "Unarchive backend files"
     unarchive:
       src: ~/project/artifact.tar.gz
-      dest: ~/backend-app
+      dest: ~/backend
       mode: 0755
       owner: ubuntu
       group: ubuntu
 
   - name: "Installing dependencies"
     shell: |
-      cd backend-app
+      cd backend
       curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
       sudo apt install -y nodejs
       sudo npm install -g npm@latest
@@ -23,3 +23,5 @@
       sudo npm install
       sudo npm run build
       sudo pm2 start npm --name backend -- start
+
+ 
