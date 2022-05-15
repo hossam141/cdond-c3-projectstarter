@@ -204,25 +204,24 @@ jobs:
       - destroy_environment
           
 
-  configure-infrastructure:
-      docker:
-        - image: cimg/base:2022.04
-      steps:
-        - checkout
-        - install_awscli
-        - install_ansible
-        - add_ssh_keys:
-            fingerprints: [ "4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b" ]
-        - attach_workspace:
-            at: ~/
-        - run:
-            name: Configure server
-            command: |
-              cd .circleci/ansible
-              cat inventory.txt
-              ansible-playbook -i inventory.txt configure-server.yml
-
-      - destroy_environment
+configure-infrastructure:
+    docker:
+      - image: cimg/base:2022.04
+    steps:
+      - checkout
+      - install_awscli
+      - install_ansible
+      - add_ssh_keys:
+          fingerprints: ["4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Configure server
+          command: |
+            cd .circleci/ansible
+            cat inventory.txt
+            ansible-playbook -i inventory.txt configure-server.yml
+      - destroy-environment
 
   run-migrations:
       docker:
