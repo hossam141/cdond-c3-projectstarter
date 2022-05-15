@@ -28,7 +28,7 @@ commands:
       - run:
           name: Install nodejs
           command: |
-            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
             sudo apt install -y nodejs
 
   destroy_environment:
@@ -316,7 +316,7 @@ jobs:
 
             cd ..
             cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files 
-            
+
       - run:
           name: Deploy backend
           command: |
