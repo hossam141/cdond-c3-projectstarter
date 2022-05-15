@@ -28,7 +28,7 @@ commands:
       - run:
           name: Install nodejs
           command: |
-            curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
             sudo apt install -y nodejs
 
   destroy_environment:
@@ -206,19 +206,14 @@ jobs:
 
   configure-infrastructure:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: cimg/base:stable
     steps:
       - checkout
+      - install_ansible
       - add_ssh_keys:
           fingerprints: [ "4b:7a:4f:85:10:a0:8a:1e:9a:01:6e:67:2a:56:20:2b" ]
       - attach_workspace:
-          at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update curl nodejs npm ansible zip
-            pip install awscli
-
+          at: ~/  
       - run:
           name: Configure server
           command: |
