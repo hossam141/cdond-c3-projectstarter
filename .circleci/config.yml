@@ -256,13 +256,13 @@ jobs:
         
   deploy-frontend:
     docker:
-      - image: cimg/base:2022.04 
+      - image: cimg/base:stable
     steps:
       - checkout
       - install_awscli
       - install_nodejs
       - restore_cache:
-          keys: [backend-build]
+          keys: [frontend-build]
       - run:
           name: Install dependencies
           command: |
@@ -275,8 +275,8 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            export API_URL="http://${BACKEND_PUPLIC_IP}:3030"
-            echo "${API_URL}"
+            export API_URL="http://${BACKEND_PUPLIC_IP}:3030" >> frontend/.env
+            cat frontend/.env
       - run:
           name: Deploy frontend objects
           command: |
@@ -290,7 +290,7 @@ jobs:
 
   deploy-backend:
     docker:
-      - image: cimg/base:2022.04
+      - image: cimg/base:stable
     steps:
       - checkout
       - install_awscli
@@ -308,20 +308,22 @@ jobs:
             cd backend
             npm install
       - run:
-          name: package backend
+          name: Package backend
           command: |
             cd backend
-            npm i
             npm run build
-            cd ../
-            tar -czf artifact.tar.gz backend
-            cp artifact.tar.gz .circleci/ansible/roles/deploy/tasks/files
+            tar -czf artifact.tar.gz dist/* package*
+
+            cd ..
+            cp backend/artifact.tar.gz .circleci/ansible/roles/deploy/files 
+            
       - run:
           name: Deploy backend
           command: |
             export TYPEORM_MIGRATIONS_DIR=.migrations
             export TYPEORM_ENTITIES=./modules/domain/**/*.entity{.ts,.js}
             export TYPEORM_MIGRATIONS=./migrations/*.ts
+
             cd .circleci/ansible
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy_environment
