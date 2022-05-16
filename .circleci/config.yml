@@ -195,8 +195,6 @@ jobs:
             echo "$BACKEND_AWS_PUBLIC_IP" >> .circleci/ansible/inventory.txt
             cat .circleci/ansible/inventory.txt
 
-      - run: yum -y install tar gzip
-
       - persist_to_workspace:
           root: ~/
           paths:
@@ -271,8 +269,9 @@ jobs:
               --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --query 'Reservations[*].Instances[*].PublicIpAddress' \
               --output text)
-            export API_URL="http://${BACKEND_PUPLIC_IP}:3030"
-            echo "${API_URL}"
+            echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
+            cat frontend/.env
+
       - run:
           name: Deploy frontend objects
           command: |
@@ -399,11 +398,15 @@ jobs:
             name: Fetch old WorkfloID and remove rescources
             command: |
               export STACKS=($(aws cloudformation list-stacks \ 
-                --query "StackSummaries[*].StackName" \
-                --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+                 --query "StackSummaries[*].StackName" \
+                 --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+
               echo Stack names: "${STACKS[@]}"
+
               export OldWorkflowID=$(curl --insecure https://kvdb.io/${KVDB_BUCKET}/Old_Workflow_ID)
+
               echo "The old Workflow_ID: $OldWorkflowID"
+
               if [[ "${OldWorkflowID}" =~ "${STACKS[@]}"  ]]
               then
                 aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
@@ -438,7 +441,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      - cloudfront-update:
-          requires: [smoke-test]
-      - cleanup:
-          requires: [cloudfront-update]
+      #- cloudfront-update:
+         # requires: [smoke-test]
+      #- cleanup:
+         # requires: [cloudfront-update]
