@@ -266,9 +266,10 @@ jobs:
           name: Get backend url
           command: |
             BACKEND_PUPLIC_IP=$(aws ec2 describe-instances \
-              --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --output text)
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --query 'Reservations[*].Instances[*].PublicIpAddress' \
+            --output text)
+
             echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
             cat frontend/.env
 
@@ -377,9 +378,9 @@ jobs:
           name: Update cloudfront distribution
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/cloudfront.yml \
-              --stack-name InitialStack \
-              --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
+                --template-file .circleci/files/cloudfront.yml \
+                --stack-name InitialStack \
+                --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}"
             
             
 
@@ -398,8 +399,8 @@ jobs:
             name: Fetch old WorkfloID and remove rescources
             command: |
               export STACKS=($(aws cloudformation list-stacks \ 
-                 --query "StackSummaries[*].StackName" \
-                 --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
+                     --query "StackSummaries[*].StackName" \
+                     --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
 
               echo Stack names: "${STACKS[@]}"
 
