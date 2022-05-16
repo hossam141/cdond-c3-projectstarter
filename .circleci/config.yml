@@ -397,8 +397,8 @@ jobs:
         - run:
             name: Fetch old WorkfloID and remove rescources
             command: |
-              export STACKS=($(aws cloudformation list-stacks \ 
-                     --query "StackSummaries[*].StackName" \
+              export STACKS=($(aws cloudformation \
+                     list-stacks --query "StackSummaries[*].StackName" \
                      --stack-status-filter CREATE_COMPLETE --no-paginate --output text))
 
               echo Stack names: "${STACKS[@]}"
@@ -441,7 +441,7 @@ workflows:
           requires: [run-migrations]
       - smoke-test:
           requires: [deploy-backend, deploy-frontend]
-      #- cloudfront-update:
-         # requires: [smoke-test]
-      #- cleanup:
-         # requires: [cloudfront-update]
+      - cloudfront-update:
+          requires: [smoke-test]
+      - cleanup:
+          requires: [cloudfront-update]
