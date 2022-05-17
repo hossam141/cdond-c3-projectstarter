@@ -1,0 +1,20 @@
+Public Url to GitHub repository (not private) [URL01]
+https://github.com/hossam141/cdond-c3-projectstarter.git
+--------
+
+The public URL for your S3 Bucket [URL02]
+http://udapeople-15cfd53.s3-website-us-east-1.amazonaws.com/
+--------
+
+CloudFront Distribution [URL03]
+http://d3ezambaunpxjl.cloudfront.net
+--------
+
+Curl Backend URL test [URL04]:
+http://52.207.250.142:3030/api/status
+---------
+
+Prometheus URL [URL05]:
+http://ec2-35-175-248-7.compute-1.amazonaws.com:9090/targets
+---------
+
